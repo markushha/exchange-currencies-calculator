@@ -1,23 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import {useEffect, useState} from "react";
 
 function App() {
+  const [currencies, setCurrencies] = useState([]);
+  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState({});
+
+  async function getCurrencies() {
+    try {
+        setLoading(true);
+        const response = await axios.get('https://api.exchangerate.host/latest', {
+            params: {
+                base: baseCurrency
+            }
+        });
+        setCurrencies(response.data.rates);
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getCurrencies();
+  }, []);
+
+    // if(loading) return <div>Loading...</div>;
+    // if(error) return <div>{error}</div>;
+    // if(!currencies) return <div>No currencies</div>;
+
+    console.log(currencies);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        {currencies && (
+            <div>{currencies}</div>
+        )}
     </div>
   );
 }
